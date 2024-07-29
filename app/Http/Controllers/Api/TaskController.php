@@ -28,24 +28,28 @@ class TaskController extends Controller
         $access_token = $service->getAccessToken();
         $tasks = $taskService->getAllTasks($access_token);
         $data = $request->validated();
-        $check = '';
-        foreach ($tasks as $task) {
-            $min = $task['complete_till'];
-            $max = $task['complete_till'] + $task['duration'];
-            if ($data['complete_till'] >= $min && $data['complete_till'] <= $max) {
-                $check = false;
-                break;
-            } else {
-                $check = true;
+        $check = false;
+
+        if ($tasks != '') {
+            foreach ($tasks as $task) {
+                $range = [$task['complete_till'], $task['complete_till'] + $task['duration']];
+                if ($data['complete_till'] >= $task['complete_till'] && $data['complete_till'] <= $task['complete_till'] + $task['duration']
+                    && $data['complete_till'] + $data['duration'] >= $task['complete_till'] && $data['complete_till'] + $data['duration'] <= $task['complete_till'] + $task['duration']
+                    || $data['complete_till'] >= $task['complete_till'] && $data['complete_till'] <= $task['complete_till'] + $task['duration']
+                    || $data['complete_till'] + $data['duration'] >= $task['complete_till'] && $data['complete_till'] + $data['duration'] <= $task['complete_till'] + $task['duration']
+                    || $data['complete_till'] <= $task['complete_till'] && $data['complete_till'] + $data['duration'] >= $task['complete_till'] + $task['duration']) {
+                    $check = true;
+                }
             }
         }
-        if ($check) {
+        if (!$check) {
             $data = [];
             $data[0] = $request->validated();
             return $taskService->sendTask($access_token, $data);
         } else {
             return response('Chosen time is already been taken, please choose another time range', 400);
         }
+
     }
 
     public function show(TokenService $service, TaskService $taskService, UserService $userService)

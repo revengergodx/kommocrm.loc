@@ -79,11 +79,11 @@ export default {
                 })
 
                 if (this.assignedUserTasks.some(time => (Date.parse(this.task_day + ' ' + this.task_start_time) / 1000) >= time.complete_till && (Date.parse(this.task_day + ' ' + this.task_start_time) / 1000) <= time.complete_till + time.duration || ((Date.parse(this.task_day + ' ' + this.task_start_time) / 1000) + this.duration) >= time.complete_till && ((Date.parse(this.task_day + ' ' + this.task_start_time) / 1000) + this.duration) <= time.complete_till + time.duration)) {
-                    alert('Chosen time is already been taken, please choose another time range')
+                     alert('Chosen time is already been taken, please choose another time range')
                 } else {
                     axios.post('/api/tasks/create', {
                         text: this.task_text,
-                        complete_till: Date.parse(this.task_day + ' ' + this.task_end_time) / 1000,
+                        complete_till: Date.parse(this.task_day + ' ' + this.task_start_time) / 1000,
                         duration: (Date.parse(this.task_day + ' ' + this.task_end_time) / 1000 - Date.parse(this.task_day + ' ' + this.task_start_time) / 1000),
                         responsible_user_id: this.assigned_user
                     })
@@ -104,6 +104,7 @@ export default {
         getAllTasks() {
             axios.get('/api/tasks')
                 .then(res => {
+                    if (res.data != 'There is no tasks yet') {
                     this.tasks = []
                     res.data.forEach((el) => this.tasks.push({
                         id: el.id,
@@ -111,6 +112,7 @@ export default {
                         responsible_user_id: el.responsible_user_id,
                         duration: el.duration
                     }));
+                    }
                 })
         },
 

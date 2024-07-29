@@ -11,10 +11,13 @@ class TaskService extends BaseService
     public function getAllTasks($access_token)
     {
         $transfer = Http::withToken($access_token)->get('https://' . $this->subdomain . '.kommo.com/api/v4/tasks');
-
         $response = json_decode($transfer, true);
+        if ($response === null) {
+            return $response;
+        } else {
         $response = $response['_embedded'];
         return $response['tasks'];
+        }
     }
 
     public function getSingleTask($userService, $access_token, $id)
